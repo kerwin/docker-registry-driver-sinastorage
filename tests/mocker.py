@@ -2,8 +2,6 @@
 
 '''Monkeypatch Openstack Swift Client for testing'''
 
-import swiftclient
-
 from docker_registry.testing.utils import monkeypatch_class
 
 

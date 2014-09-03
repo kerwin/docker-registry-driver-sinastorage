@@ -7,22 +7,19 @@ except ImportError:
     import distutils.core as setuptools
 
 
-__author__ = 'Matthew Fisher'
+__author__ = 'Kerwin Piao'
 __copyright__ = 'Copyright 2014'
 __credits__ = []
 
-__license__ = 'Apache 2.0'
-__version__ = '0.2.0+git'
-__maintainer__ = 'Matthew Fisher'
-__email__ = 'matthewf@opdemand.com'
-__status__ = 'Production'
+__version__ = '0.1.0+git'
+__maintainer__ = 'Kerwin Piao'
+__email__ = 'piaoyuankui@gmail.com'
 
 __title__ = 'docker-registry-driver-sinastorage'
 __build__ = 0x000000
 
-__url__ = 'https://github.com/bacongobbler/docker-registry-driver-sinastorage'
+__url__ = 'https://github.com/kerwin/docker-registry-driver-sinastorage'
 __description__ = 'Docker registry sinastorage driver'
-d = 'https://github.com/bacongobbler/docker-registry-driver-sinastorage/archive/master.zip'
 
 setuptools.setup(
     name=__title__,
@@ -33,26 +30,24 @@ setuptools.setup(
     maintainer_email=__email__,
     url=__url__,
     description=__description__,
-    download_url=d,
-    long_description=open('./README.md').read(),
     classifiers=['Development Status :: 4 - Beta',
                  'Intended Audience :: Developers',
                  'Programming Language :: Python',
-                 # 'Programming Language :: Python :: 2.6',
                  'Programming Language :: Python :: 2.7',
-                 # 'Programming Language :: Python :: 3.2',
-                 # 'Programming Language :: Python :: 3.3',
-                 # 'Programming Language :: Python :: 3.4',
                  'Programming Language :: Python :: Implementation :: CPython',
                  'Operating System :: OS Independent',
-                 'Topic :: Utilities',
-                 'License :: OSI Approved :: Apache Software License'],
+                 'Topic :: Utilities'],
     platforms=['Independent'],
-    license=open('./LICENSE').read(),
     namespace_packages=['docker_registry', 'docker_registry.drivers'],
     packages=['docker_registry', 'docker_registry.drivers'],
-    install_requires=open('./requirements.txt').read(),
+    install_requires=[
+        "docker-registry-core>=2,<3"
+    ],
     zip_safe=True,
-    tests_require=open('./tests/requirements.txt').read(),
+    tests_require=[
+        "nose==1.3.3",
+        "coverage==3.7.1",
+    ],
     test_suite='nose.collector'
 )
+
