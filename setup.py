@@ -38,10 +38,11 @@ setuptools.setup(
                  'Operating System :: OS Independent',
                  'Topic :: Utilities'],
     platforms=['Independent'],
-    namespace_packages=['docker_registry', 'docker_registry.drivers'],
-    packages=['docker_registry', 'docker_registry.drivers'],
+    namespace_packages=['docker_registry', 'docker_registry.drivers', 'docker_registry.contrib'],
+    packages=['docker_registry', 'docker_registry.drivers', 'docker_registry.contrib'],
     install_requires=[
-        "docker-registry-core>=2,<3"
+        "docker-registry-core>=2,<3",
+        "filechunkio"
     ],
     zip_safe=True,
     tests_require=[

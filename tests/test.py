@@ -2,19 +2,25 @@
 
 from docker_registry import testing
 
-from .mocker import Connection   # noqa
-
-
 class TestQuery(testing.Query):
     def __init__(self):
-        self.scheme = 'swift'
+        self.scheme = 'sinastorage'
 
 
 class TestDriver(testing.Driver):
     def __init__(self):
-        self.scheme = 'swift'
+        self.scheme = 'sinastorage'
         self.path = ''
-        self.config = testing.Config({})
+        self.config = testing.Config({
+            'sinastorage_bucket': 'test',
+            'sinastorage_accesskey': 'yc0lnn31dUB6okXEEdGZ',
+            'sinastorage_secretkey': '44c161a1bc0577ddf126d1c60876ec5c8455ce90'
+        })
+        print '&' * 100
+        print self.config.sinastorage_accesskey
+        print self.config.sinastorage_secretkey
+        print '&' * 100
+        print '&' * 100
 
     def setUp(self):
         super(TestDriver, self).setUp()
@@ -28,8 +34,6 @@ class TestDriver(testing.Driver):
             self._storage._swift_container
         )
 
-    # XXX ignoring this
-    # swiftclient doesn't raise if what we remove doesn't exist, which is bad!
     def test_remove_inexistent(self):
         pass
 

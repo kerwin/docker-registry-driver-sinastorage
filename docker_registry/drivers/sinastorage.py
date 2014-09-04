@@ -1,3 +1,6 @@
+from docker_registry.contrib import sinastorage
+from docker_registry.contrib.sinastorage import SCSBucket
+
 from docker_registry.core import driver
 from docker_registry.core import exceptions
 from docker_registry.core import lru
@@ -6,27 +9,13 @@ from docker_registry.core import lru
 class Storage(driver.Base):
 
     def __init__(self, path=None, config=None):
-        self._swift_connection = self._create_swift_connection(config)
-        self._swift_container = config.swift_container or 'dev_container'
-        self._root_path = config.storage_path or '/'
-        if not self._root_path.endswith('/'):
-            self._root_path += '/'
+        sinastorage.setDefaultAppInfo(config.sinastorage_accesskey, config.sinastorage_secretkey)
 
-    def _create_swift_connection(self, config):
-        swift_auth_version = config.swift_auth_version or 2
-        return swiftclient.client.Connection(
-            authurl=config.swift_authurl,
-            user=config.swift_user,
-            key=config.swift_password,
-            auth_version=swift_auth_version,
-            os_options={
-                'tenant_name': config.swift_tenant_name,
-                'region_name': config.swift_region_name,
-                'object_storage_url': config.swift_object_storage_url
-            })
+        self._bucket_name = config.sinastorage_bucket
+        self._bucket = SCSBucket(config.sinastorage_bucket, secure=False)
 
     def _init_path(self, path=None):
-        path = self._root_path + path if path else self._root_path
+        path = self._bucket_name + path if path else self._bucket_name
         # Openstack does not like paths starting with '/'
         if path:
             if path.startswith('/'):
@@ -38,8 +27,7 @@ class Storage(driver.Base):
     def content_redirect_url(self, path):
         path = self._init_path(path)
         return '/'.join([
-            self._swift_connection.url,
-            self._swift_container,
+            self._bucket.base_url,
             path
         ])
 
@@ -49,14 +37,11 @@ class Storage(driver.Base):
         return self.get_store(path)
 
     def get_store(self, path, chunk_size=None):
-        try:
-            _, obj = self._swift_connection.get_object(
-                self._swift_container,
-                path,
-                resp_chunk_size=chunk_size)
-            return obj
-        except Exception:
-            raise exceptions.FileNotFoundError('%s is not there' % path)
+        response = self._bucket[path]
+        while True:
+            chunk = response.read(CHUNK)
+            if not chunk: break
+            yield chunk
 
     @lru.set
     def put_content(self, path, content):
@@ -66,10 +51,7 @@ class Storage(driver.Base):
 
     def put_store(self, path, content, chunk=None):
         try:
-            self._swift_connection.put_object(self._swift_container,
-                                              path,
-                                              content,
-                                              chunk_size=chunk)
+            self._bucket.put(path, content)
         except Exception:
             raise IOError("Could not put content: %s" % path)
 
@@ -83,7 +65,7 @@ class Storage(driver.Base):
         self.put_store(path, fp, self.buffer_size)
 
     def head_store(self, path):
-        obj = self._swift_connection.head_object(self._swift_container, path)
+        obj = self._bucket.info(path)
         return obj
 
     def list_directory(self, path=None):
@@ -91,19 +73,11 @@ class Storage(driver.Base):
             path = self._init_path(path)
             if path and not path.endswith('/'):
                 path += '/'
-            _, directory = self._swift_connection.get_container(
-                container=self._swift_container,
-                path=path)
+            files_generator = self._bucket.listdir()
             if not directory:
                 raise
-            for inode in directory:
-                # trim extra trailing slashes
-                if inode['name'].endswith('/'):
-                    inode['name'] = inode['name'][:-1]
-                if self._root_path != '/':
-                    inode['name'] = inode['name'].replace(
-                        self._init_path() + '/', '', 1)
-                yield inode['name']
+            for item in files_generator:
+                print item
         except Exception:
             raise exceptions.FileNotFoundError('%s is not there' % path)
 
@@ -127,6 +101,6 @@ class Storage(driver.Base):
         path = self._init_path(path)
         try:
             headers = self.head_store(path)
-            return headers['content-length']
+            return headers['size']
         except Exception:
             raise exceptions.FileNotFoundError('%s is not there' % path)
