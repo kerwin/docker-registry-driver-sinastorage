@@ -14,6 +14,13 @@ class Storage(driver.Base):
         self._bucket_name = config.sinastorage_bucket
         self._bucket = SCSBucket(config.sinastorage_bucket, secure=False)
 
+        all_buckets = SCSBucket().list_buckets()
+        if config.sinastorage_bucket not in [bucket for bucket, t in all_buckets]:
+            self._bucket.put_bucket()
+        else:
+            for item in self._bucket.listdir():
+                self._bucket.delete(item[0])
+
     def _init_path(self, path=None):
         path = self._bucket_name + path if path else self._bucket_name
         # Openstack does not like paths starting with '/'

@@ -14,13 +14,12 @@ from contextlib import contextmanager
 from urllib import quote_plus
 from base64 import b64encode
 import json
-import sinastorage
 
-from sinastorage.utils import (_amz_canonicalize, metadata_headers, metadata_remove_headers, 
+from docker_registry.contrib.sinastorage.utils import (_amz_canonicalize, metadata_headers, metadata_remove_headers, 
                     rfc822_fmtdate, aws_md5, aws_urlquote, guess_mimetype, 
                     info_dict, expire2datetime, getSize, rfc822_parsedate, FileWithCallback)
 
-from sinastorage.multipart import MultipartUpload,Part,FileChunkWithCallback
+from docker_registry.contrib.sinastorage.multipart import MultipartUpload,Part,FileChunkWithCallback
 
 sinastorage_domain = "sinastorage.cn"
 
@@ -450,6 +449,8 @@ class SCSBucket(object):
     n_retries = 10
 
     def __init__(self, name=None, base_url=None, timeout=None, secure=False):
+        from docker_registry.contrib import sinastorage
+
         if sinastorage.getDefaultAppInfo() is None :
             raise ValueError("access_key and secret_key must not be None! Please set sinastorage.setDefaultAppInfo('access_key', 'secret_key') first!")
         self.access_key = sinastorage.getDefaultAppInfo().access_key

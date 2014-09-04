@@ -10,7 +10,7 @@ Usage::
 
 import os
 import urllib2
-from sinastorage.bucket import SCSBucket
+from docker_registry.contrib.sinastorage.bucket import SCSBucket
 
 class ProgressCallingFile(object):
     __slots__ = ("fp", "pos", "size", "progress")
