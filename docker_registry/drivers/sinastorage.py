@@ -1,10 +1,10 @@
 from docker_registry.contrib import sinastorage
-from docker_registry.contrib.sinastorage import SCSBucket
+from docker_registry.contrib.sinastorage import SCSBucket, KeyNotFound
 
 from docker_registry.core import driver
 from docker_registry.core import exceptions
 from docker_registry.core import lru
-
+import StringIO
 
 class Storage(driver.Base):
 
@@ -22,7 +22,6 @@ class Storage(driver.Base):
                 self._bucket.delete(item[0])
 
     def _init_path(self, path=None):
-        path = self._bucket_name + path if path else self._bucket_name
         # Openstack does not like paths starting with '/'
         if path:
             if path.startswith('/'):
@@ -44,11 +43,20 @@ class Storage(driver.Base):
         return self.get_store(path)
 
     def get_store(self, path, chunk_size=None):
-        response = self._bucket[path]
-        while True:
-            chunk = response.read(CHUNK)
-            if not chunk: break
-            yield chunk
+        try:
+            response = self._bucket[path]
+        except KeyNotFound:
+            raise exceptions.FileNotFoundError('%s is not there' % path)
+
+        output = StringIO.StringIO()
+        try:
+            while True:
+                chunk = response.read(chunk_size)
+                if not chunk: break
+                output.write(chunk)
+            return output.getvalue()
+        except:
+            output.close()
 
     @lru.set
     def put_content(self, path, content):
@@ -56,9 +64,13 @@ class Storage(driver.Base):
         self.put_store(path, content)
         return path
 
-    def put_store(self, path, content, chunk=None):
+    def put_store(self, path, content, chunk=None, length=None):
+        headers = {}
+        if length is not None:
+            headers['Content-Length'] = str(length)
+
         try:
-            self._bucket.put(path, content)
+            self._bucket.put(path, content, headers=headers)
         except Exception:
             raise IOError("Could not put content: %s" % path)
 
@@ -68,8 +80,15 @@ class Storage(driver.Base):
             yield buf
 
     def stream_write(self, path, fp):
+        length = 0
+        if hasattr(fp, '__len__'):
+            length = len(fp)
+        elif hasattr(fp, 'getvalue'):
+            # it's not efficient.
+            length = len(fp.getvalue())
+
         path = self._init_path(path)
-        self.put_store(path, fp, self.buffer_size)
+        self.put_store(path, fp, chunk=self.buffer_size, length=length)
 
     def head_store(self, path):
         obj = self._bucket.info(path)
@@ -80,11 +99,12 @@ class Storage(driver.Base):
             path = self._init_path(path)
             if path and not path.endswith('/'):
                 path += '/'
-            files_generator = self._bucket.listdir()
-            if not directory:
-                raise
+            files_generator = self._bucket.listdir(prefix=path)
+            if len(list(files_generator)) == 0:
+                raise Exception('empty')
+            files_generator = self._bucket.listdir(prefix=path)
             for item in files_generator:
-                print item
+                yield item[0]
         except Exception:
             raise exceptions.FileNotFoundError('%s is not there' % path)
 
@@ -99,10 +119,19 @@ class Storage(driver.Base):
     @lru.remove
     def remove(self, path):
         path = self._init_path(path)
-        try:
-            self._swift_connection.delete_object(self._swift_container, path)
-        except Exception:
-            raise exceptions.FileNotFoundError('%s is not there' % path)
+
+        is_dir = False
+        for item in self._bucket.listdir(prefix=path+'/'):
+            self._bucket.delete(item[0])
+            is_dir = True
+
+        if not is_dir:
+            try:
+                self._bucket.info(path)
+            except Exception:
+                raise exceptions.FileNotFoundError('%s is not there' % path)
+
+        self._bucket.delete(path)
 
     def get_size(self, path):
         path = self._init_path(path)
