@@ -11,7 +11,7 @@ __author__ = 'Kerwin Piao'
 __copyright__ = 'Copyright 2014'
 __credits__ = []
 
-__version__ = '0.1.0+git'
+__version__ = '0.1.1'
 __maintainer__ = 'Kerwin Piao'
 __email__ = 'piaoyuankui@gmail.com'
 
@@ -38,8 +38,13 @@ setuptools.setup(
                  'Operating System :: OS Independent',
                  'Topic :: Utilities'],
     platforms=['Independent'],
-    namespace_packages=['docker_registry', 'docker_registry.drivers', 'docker_registry.contrib'],
-    packages=['docker_registry', 'docker_registry.drivers', 'docker_registry.contrib'],
+    namespace_packages=['docker_registry', 
+                        'docker_registry.drivers', 
+                        'docker_registry.contrib'],
+    packages=['docker_registry', 
+              'docker_registry.drivers', 
+              'docker_registry.contrib', 
+              'docker_registry.contrib.sinastorage'],
     install_requires=[
         "docker-registry-core>=2,<3",
         "filechunkio"
