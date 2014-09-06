@@ -30,8 +30,6 @@ sinastorage_secretkey: _env:SINASTORAGE_SECRETKEY
 In order to verify what you did is ok, just run `pip install tox; tox`. This will run the tests
 provided by [`docker-registry-core`][registry-core].
 
-Please also follow the contributing guidelines in [CONTRIBUTING.md](CONTRIBUTING.md).
-
 [pypi-url]: https://pypi.python.org/pypi/docker-registry-driver-sinastorage
 [registry-core]: https://github.com/dotcloud/docker-registry/tree/master/depends/docker-registry-core
 
