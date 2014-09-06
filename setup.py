@@ -45,7 +45,7 @@ setuptools.setup(
               'docker_registry.drivers', 
               'docker_registry.contrib', 
               'docker_registry.contrib.sinastorage'],
-    package_data = {'docker_registry': ['../config/*']}
+    package_data = {'docker_registry': ['../config/*']},
     install_requires=[
         "docker-registry-core>=2,<3",
         "filechunkio"

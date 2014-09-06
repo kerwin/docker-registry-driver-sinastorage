@@ -21,9 +21,11 @@ run apt-get -y install python-pip
 run apt-get -y install python-dev liblzma-dev libevent1-dev
 
 # Install docker-registry
-run pip install docker-registry-driver-sinastorage docker-registry
+run pip install docker-registry docker-registry-driver-sinastorage
 
-env DOCKER_REGISTRY_CONFIG /docker-registry/config/config_sinastorage.yml
+add . /docker-registry-driver-sinastorage
+
+env DOCKER_REGISTRY_CONFIG /docker-registry-driver-sinastorage/config/config_sinastorage.yml
 env SETTINGS_FLAVOR sinastorage
 
 expose 5000
