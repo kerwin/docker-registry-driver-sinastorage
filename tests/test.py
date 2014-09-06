@@ -13,8 +13,7 @@ class TestDriver(testing.Driver):
         self.path = ''
         self.config = testing.Config({
             'sinastorage_bucket': 'test-docker-registry',
-            'sinastorage_accesskey': 'yc0lnn31dUB6okXEEdGZ',
-            'sinastorage_secretkey': '44c161a1bc0577ddf126d1c60876ec5c8455ce90'
+            'sinastorage_accesskey': 'PUT_YOUR_ACCESSKEY',
+            'sinastorage_secretkey': 'PUT_YOUR_SECRETKEY'
         })
-
 
