@@ -1,14 +1,8 @@
-FROM ubuntu
-MAINTAINER Kerwin Piao <piaoyuankui@gmail.com>
-
-# Add the swift support
-RUN ["pip", "install", "docker-registry-driver-sinastorage"]
-
-
 # VERSION 0.1
 
 # Latest Ubuntu LTS
-from    ubuntu:14.04
+from ubuntu:14.04
+maintainer Kerwin Piao <piaoyuankui@gmail.com>
 
 # Update
 run apt-get update
