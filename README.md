@@ -1,28 +1,46 @@
 # Docker registry sinastorage driver
 
-This is a [docker-registry backend driver][registry-core] for
-[Sina Cloud Storage](http://open.sinastorage.com/).
+This is a [docker-registry backend driver][registry-core] for [Sina Cloud Storage][sina-cloud-storage].
 
-## Usage
+## Usage (recommendation)
 
-Assuming you have a working docker-registry setup:
+Go to [Sina Cloud Storage] to get your access_key first.
+Run docker-registry service by docker container
 
 ```
+docker run --rm \
+  -e SETTINGS_FLAVOR=sinastorage \
+  -e SINASTORAGE_BUCKET=private-docker-registry \
+  -e SINASTORAGE_ACCESSKEY=YOUR_ACCESSKEY \
+  -e SINASTORAGE_SECRETKEY=YOUR_SECRETKEY \
+  -e OS_TENANT_NAME=MossoCloudFS_nnnnn \
+  -p 5000:5000 \
+  --name registry \
+  kerwin/docker-registry-sinastorage
+```
+
+## Usage via pip
+
+```
+# Install pip
+apt-get -y install python-pip
+
+# Install deps for backports.lzma (python2 requires it)
+apt-get -y install python-dev liblzma-dev libevent1-dev
+
+# Install docker-registry
+pip install docker-registry
+
+# finally
 pip install docker-registry-driver-sinastorage
-```
 
-Then edit your docker-registry configuration so that `storage` reads `sinastorage`.
+export DOCKER_REGISTRY_CONFIG=/usr/local/lib/python2.7/dist-packages/config/config_sinastorage.yml
+export SETTINGS_FLAVOR=sinastorage
 
-## Options
-
-You may add any of the following to your main docker-registry configuration to further configure it:
-
-```yaml
-storage: sinastorage
-storage_path: /registry
-sinastorage_bucket: _env:SINASTORAGE_BUCKET
-sinastorage_accesskey: _env:SINASTORAGE_ACCESSKEY
-sinastorage_secretkey: _env:SINASTORAGE_SECRETKEY
+export SINASTORAGE_BUCKET=private-docker-registry
+export SINASTORAGE_ACCESSKEY=YOUR_ACCESSKEY
+export SINASTORAGE_SECRETKEY=YOUR_SECRETKEY
+docker-registry
 ```
 
 ## Contributing
@@ -32,4 +50,4 @@ provided by [`docker-registry-core`][registry-core].
 
 [pypi-url]: https://pypi.python.org/pypi/docker-registry-driver-sinastorage
 [registry-core]: https://github.com/dotcloud/docker-registry/tree/master/depends/docker-registry-core
-
+[sina-cloud-storage]: http://open.sinastorage.com/
