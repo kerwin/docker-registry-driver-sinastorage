@@ -5,6 +5,8 @@ from docker_registry.core import driver
 from docker_registry.core import exceptions
 from docker_registry.core import lru
 import StringIO
+import tempfile
+import os
 
 class Storage(driver.Base):
 
@@ -17,9 +19,6 @@ class Storage(driver.Base):
         all_buckets = SCSBucket().list_buckets()
         if config.sinastorage_bucket not in [bucket for bucket, t in all_buckets]:
             self._bucket.put_bucket()
-        else:
-            for item in self._bucket.listdir():
-                self._bucket.delete(item[0])
 
     def _init_path(self, path=None):
         # Openstack does not like paths starting with '/'
@@ -40,7 +39,14 @@ class Storage(driver.Base):
     @lru.get
     def get_content(self, path):
         path = self._init_path(path)
-        return self.get_store(path)
+
+        output = StringIO.StringIO()
+        try:
+            for buf in self.get_store(path, self.buffer_size):
+                output.write(buf)
+            return output.getvalue()
+        finally:
+            output.close()
 
     def get_store(self, path, chunk_size=None):
         try:
@@ -48,15 +54,13 @@ class Storage(driver.Base):
         except KeyNotFound:
             raise exceptions.FileNotFoundError('%s is not there' % path)
 
-        output = StringIO.StringIO()
         try:
             while True:
                 chunk = response.read(chunk_size)
                 if not chunk: break
-                output.write(chunk)
-            return output.getvalue()
+                yield chunk
         except:
-            output.close()
+            raise IOError("Could not get content: %s" % path)
 
     @lru.set
     def put_content(self, path, content):
@@ -80,15 +84,24 @@ class Storage(driver.Base):
             yield buf
 
     def stream_write(self, path, fp):
-        length = 0
+        path = self._init_path(path)
+
         if hasattr(fp, '__len__'):
             length = len(fp)
-        elif hasattr(fp, 'getvalue'):
-            # it's not efficient.
-            length = len(fp.getvalue())
+            self.put_store(path, fp, chunk=self.buffer_size, length=length)
+        else:
+            tmp_file = tempfile.mktemp()
 
-        path = self._init_path(path)
-        self.put_store(path, fp, chunk=self.buffer_size, length=length)
+            with open(tmp_file, 'w') as f:
+                while True:
+                    buf = fp.read(self.buffer_size)
+                    if not buf: break
+                    f.write(buf)
+
+            with open(tmp_file, 'r') as f:
+                self.put_store(path, f, chunk=self.buffer_size)
+
+            os.remove(tmp_file)
 
     def head_store(self, path):
         obj = self._bucket.info(path)
