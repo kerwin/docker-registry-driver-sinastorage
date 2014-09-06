@@ -11,7 +11,7 @@ __author__ = 'Kerwin Piao'
 __copyright__ = 'Copyright 2014'
 __credits__ = []
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 __maintainer__ = 'Kerwin Piao'
 __email__ = 'piaoyuankui@gmail.com'
 
