@@ -4,7 +4,7 @@ This is a [docker-registry backend driver][registry-core] for [Sina Cloud Storag
 
 ## Usage (recommendation)
 
-Go to [Sina Cloud Storage] to get your access_key first.
+Go to [Sina Cloud Storage][sina-cloud-storage] to get your access_key first.
 Run docker-registry service by docker container
 
 ```
@@ -48,6 +48,9 @@ docker-registry
 In order to verify what you did is ok, just run `pip install tox; tox`. This will run the tests
 provided by [`docker-registry-core`][registry-core].
 
+For more information, plz check [`docker-registry-readme`][registry-readme]
+
 [pypi-url]: https://pypi.python.org/pypi/docker-registry-driver-sinastorage
 [registry-core]: https://github.com/dotcloud/docker-registry/tree/master/depends/docker-registry-core
 [sina-cloud-storage]: http://open.sinastorage.com/
+[registry-readme]: https://github.com/docker/docker-registry/blob/master/README.md
