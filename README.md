@@ -5,6 +5,7 @@ This is a [docker-registry backend driver][registry-core] for [Sina Cloud Storag
 ## Usage (recommendation)
 
 Go to [Sina Cloud Storage][sina-cloud-storage] to get your access_key first.
+
 Run docker-registry service by docker container
 
 ```
@@ -13,7 +14,6 @@ docker run --rm \
   -e SINASTORAGE_BUCKET=private-docker-registry \
   -e SINASTORAGE_ACCESSKEY=YOUR_ACCESSKEY \
   -e SINASTORAGE_SECRETKEY=YOUR_SECRETKEY \
-  -e OS_TENANT_NAME=MossoCloudFS_nnnnn \
   -p 5000:5000 \
   --name registry \
   kerwin/docker-registry-sinastorage
