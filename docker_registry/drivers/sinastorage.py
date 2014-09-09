@@ -91,17 +91,20 @@ class Storage(driver.Base):
             self.put_store(path, fp, chunk=self.buffer_size, length=length)
         else:
             tmp_file = tempfile.mktemp()
+            try:
+                with open(tmp_file, 'w') as f:
+                    while True:
+                        buf = fp.read(self.buffer_size)
+                        if not buf: break
+                        f.write(buf)
 
-            with open(tmp_file, 'w') as f:
-                while True:
-                    buf = fp.read(self.buffer_size)
-                    if not buf: break
-                    f.write(buf)
-
-            with open(tmp_file, 'r') as f:
-                self.put_store(path, f, chunk=self.buffer_size)
-
-            os.remove(tmp_file)
+                with open(tmp_file, 'r') as f:
+                    self.put_store(path, f, chunk=self.buffer_size)
+            except:
+                raise
+            finally:
+                if os.path.exists(tmp_file):
+                    os.remove(tmp_file)
 
     def head_store(self, path):
         obj = self._bucket.info(path)
