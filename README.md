@@ -11,7 +11,7 @@ Run docker-registry service by docker container
 ```
 docker run --rm \
   -e SETTINGS_FLAVOR=sinastorage \
-  -e SINASTORAGE_BUCKET=private-docker-registry \
+  -e SINASTORAGE_BUCKET=YOUR_BUCKET \
   -e SINASTORAGE_ACCESSKEY=YOUR_ACCESSKEY \
   -e SINASTORAGE_SECRETKEY=YOUR_SECRETKEY \
   -p 5000:5000 \
@@ -37,7 +37,7 @@ pip install docker-registry-driver-sinastorage
 export DOCKER_REGISTRY_CONFIG=/usr/local/lib/python2.7/dist-packages/config/config_sinastorage.yml
 export SETTINGS_FLAVOR=sinastorage
 
-export SINASTORAGE_BUCKET=private-docker-registry
+export SINASTORAGE_BUCKET=YOUR_BUCKET
 export SINASTORAGE_ACCESSKEY=YOUR_ACCESSKEY
 export SINASTORAGE_SECRETKEY=YOUR_SECRETKEY
 docker-registry
